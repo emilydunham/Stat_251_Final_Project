@@ -1,5 +1,5 @@
 ---
-title: "Stat_251_Final_Project"
+title: "Comparing Test Scores Between Boys and Girls"
 format: pdf
 author: Adam Bitner, Emily Dunham, Sammy Hilton
 ---
