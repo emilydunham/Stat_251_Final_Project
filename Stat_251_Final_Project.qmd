@@ -1,6 +1,7 @@
 ---
 title: "Stat_251_Final_Project"
 format: pdf
+author: Adam Bitner, Emily Dunham, Sammy Hilton
 ---
 
 
