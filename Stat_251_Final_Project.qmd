@@ -5,6 +5,7 @@ author: Adam Bitner, Emily Dunham, Sammy Hilton
 ---
 # Comparing Mean Test Scores between Boys and Girls
 ## Introduction
+We are interested to see the difference mean score on some test scores between boys and girls. Do girls naturally do better in some subjects than men? Do mean do better in other subjects than girls? We aim to answer this question. This analysis is helpful because it can help teachers better understand who could be predisposed to struggle more in the class. Furthermore this can help universities and educators to understand effects of different teaching methods and give a better base line for expected performance. The American Psychology association has published an analysis claiming that girls do better than boys in school in essentially all subjects, we will be testing the validity of that claim.
 
 ```{r}
 
