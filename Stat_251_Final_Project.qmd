@@ -7,6 +7,45 @@ author: Adam Bitner, Emily Dunham, Sammy Hilton
 ## Introduction
 We are interested to see the difference mean score on some test scores between boys and girls. Do girls naturally do better in some subjects than men? Do mean do better in other subjects than girls? We aim to answer this question. This analysis is helpful because it can help teachers better understand who could be predisposed to struggle more in the class. Furthermore this can help universities and educators to understand effects of different teaching methods and give a better base line for expected performance. The American Psychology association has published an analysis claiming that girls do better than boys in school in essentially all subjects, we will be testing the validity of that claim.
 
-```{r}
-
+```{r, echo = FALSE}
+# Loading dataset/packages
+StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/StudentsPerformance.csv")
 ```
+
+## Getting our Prior
+** Explain the process **
+```{r, echo = FALSE}
+# We will just use the same prior for both boys and girls
+
+# Prior
+# We need a mean prior and a variance prior
+# mean prior will be a Normal distribution
+# variance prior will be a Inverse Gamma distribution
+
+# Prior (Mean)
+m <- 80 # we think that the mean will be around 80 for an overall test score
+sigma <- 5 # we think that or mean about the mean will be off by around 5pts
+
+# Prior (Variance)
+# We will use a method of moments to get the inverse gamma a and b values
+# We will use this function to get our a and b values. We do this by giving it 
+# our beliefs about sigma. 
+ig_from_sigma_mom <- function(mean_sigma, sd_sigma) {
+  stopifnot(mean_sigma > 0, sd_sigma > 0)
+  mean_var <- mean_sigma^2
+  sd_var <- 2 * mean_sigma * sd_sigma
+  a <- 2 + (mean_var^2)/(sd_var^2)
+  b <- mean_var * (a - 1)
+  list(a = a, b = b)
+}
+a_and_b <- ig_from_sigma_mom(mean_sigma = 10, sd_sigma = 4) 
+# we think that our sigma will be around 10 and that we will be off by about 4
+```
+Likelihood = $\text{N}\sim(\mu, \sigma^2)$
+
+$\mu = \text{N}\sim(80, 5^2)$
+
+$\sigma^2 = \text{IG}\sim(3.6, 256.3)$
+
+
+
