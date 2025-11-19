@@ -13,7 +13,14 @@ StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/Stu
 ```
 
 ## Getting our Prior
-** Explain the process **
+The relevant parameters for our likelihood that we chose would be from a normal distribution. Since we believe that grades on a test will behave in a distribution that is likely to look more normal where most students will do generally well and only a few will get really high scores and a few will get very low scores. This will be useful in answering our question because we know that for most students this will generally be the pattern. For our prior distribution we decided that our priors for both boys and girls will be the same. However we still need two priors, one for the mean and one for the standard deviation of our likelihood.
+$$\text{Likelihood} = \text{N}\sim(\mu, \sigma^2)$$
+
+For the mean we chose a normal prior with $\mu = 80$ because we believe that most students will average around 80. We chose $\sigma^2 = 5$ because we believe that our guess about the mean being 80 might be off by around 5 points.
+$$\mu = \text{N}\sim(80, 5^2)$$
+
+For the standard deviation we chose an inverse gamma prior. In order to find what our $a$ and $b$ values would be we chose what we expected the value of $\sigma^2$ would be for our likelihood and what we thought the standard deviation of that would be. In our case we chose the mean and standard deviation to be 10 and 4 respectively. Then using method of moments we took those values and calculated $a$ and $b$. From our results we got that $a = 3.6$ and $b = 256.3$.
+$$\sigma^2 = \text{IG}\sim(3.6, 256.3)$$
 ```{r, echo = FALSE}
 # We will just use the same prior for both boys and girls
 
@@ -41,11 +48,7 @@ ig_from_sigma_mom <- function(mean_sigma, sd_sigma) {
 a_and_b <- ig_from_sigma_mom(mean_sigma = 10, sd_sigma = 4) 
 # we think that our sigma will be around 10 and that we will be off by about 4
 ```
-Likelihood = $\text{N}\sim(\mu, \sigma^2)$
 
-$\mu = \text{N}\sim(80, 5^2)$
-
-$\sigma^2 = \text{IG}\sim(3.6, 256.3)$
 
 
 
