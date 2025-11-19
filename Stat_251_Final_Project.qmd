@@ -12,7 +12,8 @@ We are interested to see the difference mean score on some test scores between b
 StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/StudentsPerformance.csv")
 ```
 
-## Getting our Prior
+## Methods
+### Getting our Likelihood and Priors
 The relevant parameters for our likelihood that we chose would be from a normal distribution. Since we believe that grades on a test will behave in a distribution that is likely to look more normal where most students will do generally well and only a few will get really high scores and a few will get very low scores. This will be useful in answering our question because we know that for most students this will generally be the pattern. For our prior distribution we decided that our priors for both boys and girls will be the same. However we still need two priors, one for the mean and one for the standard deviation of our likelihood.
 $$\text{Likelihood} = \text{N}\sim(\mu, \sigma^2)$$
 
