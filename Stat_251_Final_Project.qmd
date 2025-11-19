@@ -3,8 +3,7 @@ title: "Comparing Test Scores Between Boys and Girls"
 format: pdf
 author: Adam Bitner, Emily Dunham, Sammy Hilton
 ---
-# Comparing Mean Test Scores between Boys and Girls
-## Introduction
+# Introduction
 We are interested to see the difference mean score on some test scores between boys and girls. Do girls naturally do better in some subjects than men? Do mean do better in other subjects than girls? We aim to answer this question. This analysis is helpful because it can help teachers better understand who could be predisposed to struggle more in the class. Furthermore this can help universities and educators to understand effects of different teaching methods and give a better base line for expected performance. The American Psychology association has published an analysis claiming that girls do better than boys in school in essentially all subjects, we will be testing the validity of that claim.
 
 ```{r, echo = FALSE}
@@ -12,8 +11,8 @@ We are interested to see the difference mean score on some test scores between b
 StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/StudentsPerformance.csv")
 ```
 
-## Methods
-### Getting our Likelihood and Priors
+# Methods
+## Getting our Likelihood and Priors
 The relevant parameters for our likelihood that we chose would be from a normal distribution. Since we believe that grades on a test will behave in a distribution that is likely to look more normal where most students will do generally well and only a few will get really high scores and a few will get very low scores. This will be useful in answering our question because we know that for most students this will generally be the pattern. For our prior distribution we decided that our priors for both boys and girls will be the same. However we still need two priors, one for the mean and one for the standard deviation of our likelihood.
 $$\text{Likelihood} = \text{N}\sim(\mu, \sigma^2)$$
 
