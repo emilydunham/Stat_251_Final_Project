@@ -9,6 +9,7 @@ We are interested to see the difference mean score on some test scores between b
 ```{r, echo = FALSE}
 # Loading dataset/packages
 StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/StudentsPerformance.csv")
+library(invgamma)
 ```
 
 # Methods
@@ -20,7 +21,7 @@ For the mean we chose a normal prior with $\mu = 80$ because we believe that mos
 $$\mu = \text{N}\sim(80, 5^2)$$
 
 For the standard deviation we chose an inverse gamma prior. In order to find what our $a$ and $b$ values would be we chose what we expected the value of $\sigma^2$ would be for our likelihood and what we thought the standard deviation of that would be. In our case we chose the mean and standard deviation to be 10 and 4 respectively. Then using method of moments we took those values and calculated $a$ and $b$. From our results we got that $a = 3.6$ and $b = 256.3$.
-$$\sigma^2 = \text{IG}\sim(3.6, 256.3)$$
+$$\sigma^2 = \text{IG}\sim(3.6, 256)$$
 ```{r, echo = FALSE}
 # We will just use the same prior for both boys and girls
 
@@ -30,8 +31,8 @@ $$\sigma^2 = \text{IG}\sim(3.6, 256.3)$$
 # variance prior will be a Inverse Gamma distribution
 
 # Prior (Mean)
-m <- 80 # we think that the mean will be around 80 for an overall test score
-sigma <- 5 # we think that or mean about the mean will be off by around 5pts
+# we think that the mean will be around 80 for an overall test score
+# we think that or mean about the mean will be off by around 5pts
 
 # Prior (Variance)
 # We will use a method of moments to get the inverse gamma a and b values
@@ -49,6 +50,110 @@ a_and_b <- ig_from_sigma_mom(mean_sigma = 10, sd_sigma = 4)
 # we think that our sigma will be around 10 and that we will be off by about 4
 ```
 
+# Results
+## Posterior
+```{r, echo = FALSE, include = FALSE}
+## Boys Math Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_male_math <- StudentsPerformance$math.score[StudentsPerformance$gender == "male"]
+
+update.mu <- function(sigma2,ys,m,v){
+  n <- length(ys)
+  vstar = 1/(n/sigma2 + 1/v)
+  ybar <- mean(ys)
+  mstar = vstar * (n*ybar/sigma2 + m/v)
+  rnorm(1, mstar, sqrt(vstar))
+}
+
+update.var <- function(mu,ys,a,b){
+  n <- length(ys)
+  astar <- a + n/2
+  bstar <- b + 0.5*sum((ys-mu)^2)
+  rinvgamma(1, astar, bstar) 
+}
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu <- rep(NA, J + 1)
+sigma2 <- rep(NA, J + 1)
+
+# Step 0:
+mu[1] <- mean(y_male_math)
+sigma2[1] <- var(y_male_math)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu[j] <- update.mu(sigma2 = sigma2[j-1], ys = y_male_math, m = m, v = v)
+  sigma2[j] <- update.var(mu = mu[j], ys = y_male_math, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p1 <- plot(mu, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of boys math scores")))
+# Trace plot of the sigma2 draws
+p2 <- plot(sigma2, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of boys math scores")))
+
+# Get the means
+boys_math_mu <- mean(mu[-c(1:50)]) #taking off a bit of burn in
+boys_math_var <- mean(sigma2[-c(1:50)]) # this is my variance
+boys_math_sd <- sqrt(mean(sigma2[-c(1:50)])) # this is my standard deviation
+# So for boys math scores we have a mean of 69 and a standard deviation of 14.3
+```
+```{r, echo = FALSE, include = FALSE}
+## Girls Math Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_female_math <- StudentsPerformance$math.score[StudentsPerformance$gender == "female"]
+
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu <- rep(NA, J + 1)
+sigma2 <- rep(NA, J + 1)
+
+# Step 0:
+mu[1] <- mean(y_female_math)
+sigma2[1] <- var(y_female_math)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu[j] <- update.mu(sigma2 = sigma2[j-1], ys = y_female_math, m = m, v = v)
+  sigma2[j] <- update.var(mu = mu[j], ys = y_female_math, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p3 <- plot(mu, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of girls math scores")))
+# Trace plot of the sigma2 draws
+p4 <- plot(sigma2, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of girls math scores")))
+
+# Get the means
+girls_math_mu <- mean(mu[-c(1:50)]) #taking off a bit of burn in
+girls_math_var <- mean(sigma2[-c(1:50)]) # this is my variance
+girls_math_sd <- sqrt(mean(sigma2[-c(1:50)])) # this is my standard deviation
+# So for boys math scores we have a mean of 64 and a standard deviation of 15.4
+```
+```{r, echo = FALSE}
+# Comparing the difference using Monte Carlo
+set.seed(1)
+samples_b <- rnorm(10000, boys_math_mu, boys_math_sd)
+samples_g <- rnorm(10000, girls_math_mu, girls_math_sd)
+diffs <- samples_b - samples_g
+CI <- quantile(diffs, c(.025, .975))
+mean_math_diffs <- mean(diffs)
+plot(density(diffs), 
+     main="Posterior of Boys - Girls Mean Difference \n in Math Scores",
+     xlab="Difference")
+abline(v=0, col = "red")
+
+```
 
 
 
