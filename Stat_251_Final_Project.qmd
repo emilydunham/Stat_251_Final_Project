@@ -173,6 +173,125 @@ legend("topright",
 Based on our posterior we are 95% sure that the difference between boys and girls math scores is between 3.14 and 6.79 points. Since 0 is not in our interval we can conclude that boys are better at math then girls.
 
 ## Posterior for Writing Test Scores
+## Boys Writing Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_male_writing <- StudentsPerformance$writing.score[StudentsPerformance$gender == "male"]
+
+update.mu <- function(sigma2,ys,m,v){
+  n <- length(ys)
+  vstar = 1/(n/sigma2 + 1/v)
+  ybar <- mean(ys)
+  mstar = vstar * (n*ybar/sigma2 + m/v)
+  rnorm(1, mstar, sqrt(vstar))
+}
+
+update.var <- function(mu,ys,a,b){
+  n <- length(ys)
+  astar <- a + n/2
+  bstar <- b + 0.5*sum((ys-mu)^2)
+  rinvgamma(1, astar, bstar) 
+}
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu_mm <- rep(NA, J + 1)
+sigma2_mm <- rep(NA, J + 1)
+
+# Step 0:
+mu_mm[1] <- mean(y_male_writing)
+sigma2_mm[1] <- var(y_male_writing)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu_mm[j] <- update.mu(sigma2 = sigma2_mm[j-1], ys = y_male_writing, m = m, v = v)
+  sigma2_mm[j] <- update.var(mu = mu_mm[j], ys = y_male_writing, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p1 <- plot(mu_mm, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of boys writing scores")))
+# Trace plot of the sigma2 draws
+p2 <- plot(sigma2_mm, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of boys writing scores")))
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+## Girls Writing Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_female_writing <- StudentsPerformance$writng.score[StudentsPerformance$gender == "female"]
+
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu_fm <- rep(NA, J + 1)
+sigma2_fm <- rep(NA, J + 1)
+
+# Step 0:
+mu_fm[1] <- mean(y_female_writing)
+sigma2_fm[1] <- var(y_female_writing)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu_fm[j] <- update.mu(sigma2 = sigma2_fm[j-1], ys = y_female_writing, m = m, v = v)
+  sigma2_fm[j] <- update.var(mu = mu_fm[j], ys = y_female_writing, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p3 <- plot(mu_fm, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of girls writing scores")))
+# Trace plot of the sigma2 draws
+p4 <- plot(sigma2_fm, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of girls writing scores")))
+```
+
+```{r, echo = FALSE}
+# Comparing the difference using Monte Carlo
+set.seed(1)
+
+diffs <- mu_mm - mu_fm
+
+CI <- quantile(diffs, c(.025, .975))
+
+mean_writing_diffs <- mean(diffs)
+
+# Prior
+m <- 80
+v <- 5^2
+a <- 3.6
+b <- 256
+
+prior_male  <- rnorm(10000, m, sqrt(v))
+prior_female <- rnorm(10000, m, sqrt(v))
+
+prior_diffs <- prior_male - prior_female
+
+# Plot them together
+plot(density(diffs),
+     main="Prior vs Posterior\nDifference in Mean Writing Scores (Boys - Girls)",
+     xlab="Difference (Boys - Girls)",
+     col="black",
+     lwd=2,
+     xlim = c(-26, 28))
+
+lines(density(prior_diffs),
+      col="maroon2",
+      lwd=2)
+
+legend("topright",
+       legend=c("Prior", "Posterior"),
+       col=c("maroon2", "black"),
+       lwd=2)
+
+```
+Based on our posterior we are 95% sure that the difference between boys and girls writing scores is between ______ and ______ points. Since 0 is not in our interval we can conclude that boys are better at writing then girls.
+
 
 ## Posterior for Reading Test Scores
 
