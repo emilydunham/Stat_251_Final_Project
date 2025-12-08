@@ -6,13 +6,38 @@ author: Adam Bitner, Emily Dunham, Sammy Hilton
 # Introduction
 We are interested to see the difference mean score on some test scores between boys and girls. Do girls naturally do better in some subjects than men? Do mean do better in other subjects than girls? We aim to answer this question. This analysis is helpful because it can help teachers better understand who could be predisposed to struggle more in the class. Furthermore this can help universities and educators to understand effects of different teaching methods and give a better base line for expected performance. The American Psychology association has published an analysis claiming that girls do better than boys in school in essentially all subjects, we will be testing the validity of that claim.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, include = FALSE}
 # Loading dataset/packages
 StudentsPerformance <- read.csv("./StudentsPerformance.csv")
 library(invgamma)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.asp=.618, fig.align="center",
+fig.path='Figs/', warning=FALSE, message=FALSE, cache=TRUE)
 ```
 
 # Methods
+## Data
+We got our data from Kaggle. The data contains test scores from high school students in the United States. It has test scores for both boys and girls for math, writing, and reading. https://www.kaggle.com/datasets/spscientist/students-performance-in-exams
+```{r, echo = FALSE}
+StudentsPerformance %>%
+  pivot_longer(cols = c(math.score, reading.score, writing.score),
+               names_to = "subject", values_to = "score") %>%
+  ggplot(aes(x = score, fill = subject)) +
+  geom_histogram(bins = 20, alpha = 0.6, position = "identity") +
+  facet_wrap(~ gender) +
+  theme_minimal() +
+  labs(title = "Distribution of Exam Scores by Gender")
+
+mean_math <- mean(StudentsPerformance$math.score)
+mean_writing <- mean(StudentsPerformance$writing.score)
+mean_reading <- mean(StudentsPerformance$reading.score)
+```
+We can see the mean math score overall is `r mean_math`, the mean writing score is `r mean_writing` and the mean reading score is `r mean_reading`.
+
 ## Getting our Likelihood and Priors
 The relevant parameters for our likelihood that we chose would be from a normal distribution. Since we believe that grades on a test will behave in a distribution that is likely to look more normal where most students will do generally well and only a few will get really high scores and a few will get very low scores. This will be useful in answering our question because we know that for most students this will generally be the pattern. For our prior distribution we decided that our priors for both boys and girls will be the same. However we still need two priors, one for the mean and one for the standard deviation of our likelihood.
 $$\text{Likelihood} = \text{N}\sim(\mu, \sigma^2)$$
@@ -170,7 +195,7 @@ legend("topright",
        lwd=2)
 
 ```
-Based on our posterior we are 95% sure that the difference between boys and girls math scores is between 3.14 and 6.79 points. Since 0 is not in our interval we can conclude that boys are better at math then girls.
+Based on our posterior we are 95% sure that the difference between boys and girls math scores is between 3.14 and 6.79 points. Since 0 is not in our interval we can conclude that boys are better at math than girls.
 
 ## Posterior for Writing Test Scores
 ```{r, echo = FALSE, include = FALSE}
@@ -256,7 +281,7 @@ set.seed(1)
 
 diffs <- mu_mm - mu_fm
 
-CI <- quantile(diffs, c(.025, .975))
+CIw <- quantile(diffs, c(.025, .975))
 
 mean_writing_diffs <- mean(diffs)
 
@@ -289,7 +314,7 @@ legend("topright",
        lwd=2)
 
 ```
-Based on our posterior we are 95% sure that the difference between boys and girls writing scores is between ______ and ______ points. Since 0 is not in our interval we can conclude that boys are better at writing then girls.
+Based on our posterior we are 95% sure that the difference between boys and girls writing scores is between `r round(CIw[1], 2)` and `r round(CIw[2], 2)` points. Since 0 is not in our interval we can conclude that girls are better at writing than boys.
 
 
 ## Posterior for Reading Test Scores
@@ -379,7 +404,7 @@ set.seed(1)
 
 diffs <- mu_mr - mu_fr
 
-CI <- quantile(diffs, c(.025, .975))
+CIr <- quantile(diffs, c(.025, .975))
 
 mean_reading_diffs <- mean(diffs)
 
@@ -412,5 +437,14 @@ legend("topright",
        lwd=2)
 
 ```
+Based on our posterior we are 95% sure that the difference between boys and girls writing scores is between `r round(CIr[1], 2)` and `r round(CIr[2], 2)` points. Since 0 is not in our interval we can conclude that girls are better at reading than boys.
 
+# Discussion
+After our analysis, we found that boys and girls score better in different subjects. Boys score better than girls in the subject of math. We found that girls score better than boys in writing and reading. These differences may reflect different interests of boys vs. girls in school subjects. Understanding these differences can help teachers design targeted interventions to support students in subjects where they may struggle. 
 
+There are some limitations to our analysis. We are gonna use a normal posterior to model these, but technically we are assuming that these students could get more than 100 or less than 0, so that’s a limitation. Another limitation is that we only have 3 subjects, so we could do another analysis with more school subjects. This is also only for students in the U.S., so we don’t have data from students world wide. 
+
+Some follow up questions could be - Do boys vs. girls perform better in other subjects of interest?
+Do lower vs. upper class students perform better on math, reading, and writing?
+
+# Apendix
