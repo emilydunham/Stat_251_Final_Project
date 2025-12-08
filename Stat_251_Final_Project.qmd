@@ -8,7 +8,7 @@ We are interested to see the difference mean score on some test scores between b
 
 ```{r, echo = FALSE}
 # Loading dataset/packages
-StudentsPerformance <- read.csv("~/Documents/BYU/Fall 2025 Semester/Stat 251/StudentsPerformance.csv")
+StudentsPerformance <- read.csv("./StudentsPerformance.csv")
 library(invgamma)
 ```
 
@@ -175,6 +175,7 @@ Based on our posterior we are 95% sure that the difference between boys and girl
 ## Posterior for Writing Test Scores
 ## Boys Writing Scores:
 # Priors
+```{r}
 m <- 80; v <- 5^2 # mu ~ N(m,v)
 a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
 y_male_writing <- StudentsPerformance$writing.score[StudentsPerformance$gender == "male"]
@@ -294,5 +295,124 @@ Based on our posterior we are 95% sure that the difference between boys and girl
 
 
 ## Posterior for Reading Test Scores
+
+```{r}
+## Boys Math Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_male_reading <- StudentsPerformance$reading.score[StudentsPerformance$gender == "male"]
+
+update.mu <- function(sigma2,ys,m,v){
+  n <- length(ys)
+  vstar = 1/(n/sigma2 + 1/v)
+  ybar <- mean(ys)
+  mstar = vstar * (n*ybar/sigma2 + m/v)
+  rnorm(1, mstar, sqrt(vstar))
+}
+
+update.var <- function(mu,ys,a,b){
+  n <- length(ys)
+  astar <- a + n/2
+  bstar <- b + 0.5*sum((ys-mu)^2)
+  rinvgamma(1, astar, bstar) 
+}
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu_mr <- rep(NA, J + 1)
+sigma2_mr <- rep(NA, J + 1)
+
+# Step 0:
+mu_mr[1] <- mean(y_male_reading)
+sigma2_mr[1] <- var(y_male_reading)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu_mr[j] <- update.mu(sigma2 = sigma2_mr[j-1], ys = y_male_reading, m = m, v = v)
+  sigma2_mr[j] <- update.var(mu = mu_mr[j], ys = y_male_reading, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p1 <- plot(mu_mr, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of boys reading scores")))
+# Trace plot of the sigma2 draws
+p2 <- plot(sigma2_mr, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of boys reading scores")))
+
+```
+
+```{r}
+## Girls Math Scores:
+# Priors
+m <- 80; v <- 5^2 # mu ~ N(m,v)
+a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
+y_female_reading <- StudentsPerformance$reading.score[StudentsPerformance$gender == "female"]
+
+
+# We need to do the Gibbs sampling in order to find the posterior
+J <- 1000
+mu_fr <- rep(NA, J + 1)
+sigma2_fr <- rep(NA, J + 1)
+
+# Step 0:
+mu_fr[1] <- mean(y_female_reading)
+sigma2_fr[1] <- var(y_female_reading)
+
+# Step 1:
+for (j in 2:(J+1)){
+  mu_fr[j] <- update.mu(sigma2 = sigma2_fr[j-1], ys = y_female_reading, m = m, v = v)
+  sigma2_fr[j] <- update.var(mu = mu_fr[j], ys = y_female_reading, a = a, b = b)
+}
+
+# Step 2:
+# Trace plot of the mu draws
+p3 <- plot(mu_fr, type="l", ylab=expression(mu),
+     main=expression(paste("Trace plot for ",mu, " of girls reading scores")))
+# Trace plot of the sigma2 draws
+p4 <- plot(sigma2_fr, type="l", ylab=expression(sigma^2),
+     main=expression(paste("Trace plot for ",sigma^2, " of girls reading scores")))
+```
+
+```{r, echo = FALSE}
+# Comparing the difference using Monte Carlo
+set.seed(1)
+
+diffs <- mu_mr - mu_fr
+
+CI <- quantile(diffs, c(.025, .975))
+
+mean_reading_diffs <- mean(diffs)
+
+# Prior
+m <- 80
+v <- 5^2
+a <- 3.6
+b <- 256
+
+prior_male  <- rnorm(10000, m, sqrt(v))
+prior_female <- rnorm(10000, m, sqrt(v))
+
+prior_diffs <- prior_male - prior_female
+
+# Plot them together
+plot(density(diffs),
+     main="Prior vs Posterior\nDifference in Mean Reading Scores (Boys - Girls)",
+     xlab="Difference (Boys - Girls)",
+     col="black",
+     lwd=2,
+     xlim = c(-26, 28))
+
+lines(density(prior_diffs),
+      col="maroon2",
+      lwd=2)
+
+legend("topright",
+       legend=c("Prior", "Posterior"),
+       col=c("maroon2", "black"),
+       lwd=2)
+
+```
 
 
