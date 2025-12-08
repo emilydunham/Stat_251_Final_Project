@@ -173,9 +173,7 @@ legend("topright",
 Based on our posterior we are 95% sure that the difference between boys and girls math scores is between 3.14 and 6.79 points. Since 0 is not in our interval we can conclude that boys are better at math then girls.
 
 ## Posterior for Writing Test Scores
-## Boys Writing Scores:
-# Priors
-```{r}
+```{r, echo = FALSE, include = FALSE}
 m <- 80; v <- 5^2 # mu ~ N(m,v)
 a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
 y_male_writing <- StudentsPerformance$writing.score[StudentsPerformance$gender == "male"]
@@ -225,7 +223,7 @@ p2 <- plot(sigma2_mm, type="l", ylab=expression(sigma^2),
 # Priors
 m <- 80; v <- 5^2 # mu ~ N(m,v)
 a <- 3.6; b <- 256 # sigma^2 ~ IG(a, b)
-y_female_writing <- StudentsPerformance$writng.score[StudentsPerformance$gender == "female"]
+y_female_writing <- StudentsPerformance$writing.score[StudentsPerformance$gender == "female"]
 
 
 # We need to do the Gibbs sampling in order to find the posterior
@@ -296,7 +294,7 @@ Based on our posterior we are 95% sure that the difference between boys and girl
 
 ## Posterior for Reading Test Scores
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 ## Boys Math Scores:
 # Priors
 m <- 80; v <- 5^2 # mu ~ N(m,v)
@@ -343,7 +341,7 @@ p2 <- plot(sigma2_mr, type="l", ylab=expression(sigma^2),
 
 ```
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 ## Girls Math Scores:
 # Priors
 m <- 80; v <- 5^2 # mu ~ N(m,v)
